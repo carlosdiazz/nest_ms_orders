@@ -1,0 +1,1 @@
+export const NAME_PRODUCT_SERVICE = 'PRODUCT_SERVICE';

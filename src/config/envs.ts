@@ -6,6 +6,10 @@ interface EnvVars {
 
   //DB
   DATABASE_URL: string;
+
+  //PRODUCT
+  PRODUCTS_MS_HOST: string;
+  PRODUCTS_MS_PORT: number;
 }
 
 const envsSchema = joi
@@ -13,6 +17,9 @@ const envsSchema = joi
     PORT: joi.number().required(),
 
     DATABASE_URL: joi.string().required(),
+
+    PRODUCTS_MS_PORT: joi.number().required(),
+    PRODUCTS_MS_HOST: joi.string().required(),
   })
   .unknown(true);
 
@@ -28,4 +35,7 @@ export const envs: EnvVars = {
   PORT: enVars.PORT,
 
   DATABASE_URL: enVars.DATABASE_URL,
+
+  PRODUCTS_MS_HOST: enVars.PRODUCTS_MS_HOST,
+  PRODUCTS_MS_PORT: enVars.PRODUCTS_MS_PORT,
 };
