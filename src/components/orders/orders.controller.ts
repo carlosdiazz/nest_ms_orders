@@ -1,29 +1,34 @@
-import { Controller, NotImplementedException } from '@nestjs/common';
+import { Controller, ParseUUIDPipe } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
+
+//Propio
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { ChangeOrderStatusDto, OrdersAllDto } from './dto/orders-all.dto';
 
 @Controller()
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @MessagePattern('createOrder')
-  create(@Payload() createOrderDto: CreateOrderDto) {
-    return this.ordersService.create(createOrderDto);
+  private async create(@Payload() createOrderDto: CreateOrderDto) {
+    return await this.ordersService.create(createOrderDto);
   }
 
   @MessagePattern('findAllOrders')
-  findAll() {
-    return this.ordersService.findAll();
+  private async findAll(@Payload() orderPaginationDto: OrdersAllDto) {
+    return await this.ordersService.findAll(orderPaginationDto);
   }
 
   @MessagePattern('findOneOrder')
-  findOne(@Payload() id: number) {
-    return this.ordersService.findOne(id);
+  private async findOne(@Payload('id', ParseUUIDPipe) id: string) {
+    return await this.ordersService.findOne(id);
   }
 
   @MessagePattern('changeStatusOrder')
-  changeStatus() {
-    throw new NotImplementedException();
+  private async changeStatus(
+    @Payload() changeOrderStatusDto: ChangeOrderStatusDto,
+  ) {
+    return await this.ordersService.changeStatus(changeOrderStatusDto);
   }
 }
