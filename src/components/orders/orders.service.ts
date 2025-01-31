@@ -9,16 +9,17 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { PrismaClient } from '@prisma/client';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { ChangeOrderStatusDto, OrdersAllDto } from './dto/orders-all.dto';
-import { NAME_PRODUCT_SERVICE } from 'src/config';
+import {
+  NAME_NATS_SERVICE,
+  //NAME_PRODUCT_SERVICE
+} from 'src/config';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class OrdersService extends PrismaClient implements OnModuleInit {
   private readonly logger = new Logger('OrdersService');
 
-  constructor(
-    @Inject(NAME_PRODUCT_SERVICE) private readonly productsClient: ClientProxy,
-  ) {
+  constructor(@Inject(NAME_NATS_SERVICE) private readonly client: ClientProxy) {
     super();
   }
 
@@ -35,10 +36,7 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
     try {
       //1. Confirmar los ids de los Productos
       const products: any[] = await firstValueFrom(
-        this.productsClient.send(
-          { name: 'validateProducts' },
-          { ids: productsIds },
-        ),
+        this.client.send({ name: 'validateProducts' }, { ids: productsIds }),
       );
 
       //2. Calcular El TotalAmount
