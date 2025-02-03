@@ -36,7 +36,7 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
     try {
       //1. Confirmar los ids de los Productos
       const products: any[] = await firstValueFrom(
-        this.client.send({ name: 'validateProducts' }, { ids: productsIds }),
+        this.client.send('validateProducts', { ids: productsIds }),
       );
 
       //2. Calcular El TotalAmount
