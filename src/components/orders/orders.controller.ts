@@ -5,6 +5,7 @@ import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { ChangeOrderStatusDto, OrdersAllDto } from './dto/orders-all.dto';
+import { PaidOrderDto } from './dto/paid-order.dto';
 
 @Controller()
 export class OrdersController {
@@ -42,7 +43,7 @@ export class OrdersController {
 
   //Aqui recibo el evento
   @EventPattern('payment.succeeded')
-  paidOrder(@Payload() paidOrderDto: any) {
-    console.log(paidOrderDto);
+  paidOrder(@Payload() paidOrderDto: PaidOrderDto) {
+    return this.ordersService.paidOrder(paidOrderDto);
   }
 }
