@@ -14,6 +14,7 @@ import {
   //NAME_PRODUCT_SERVICE
 } from 'src/config';
 import { firstValueFrom } from 'rxjs';
+import { OrderWithProducts } from './interfaces/order-with-products.interface';
 
 @Injectable()
 export class OrdersService extends PrismaClient implements OnModuleInit {
@@ -26,6 +27,23 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
   async onModuleInit() {
     await this.$connect();
     this.logger.log('DATABASE UP');
+  }
+
+  public async createPaymentSession(order: OrderWithProducts) {
+    const paymentSession = await firstValueFrom(
+      this.client.send('create.payment.session', {
+        orderId: order.id,
+        currency: 'usd',
+        items: order.OrderItem.map((item) => ({
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+        })),
+      }),
+    );
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return paymentSession;
   }
 
   public async create(createOrderDto: CreateOrderDto) {
@@ -79,12 +97,22 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
             select: {
               price: true,
               quantity: true,
+              productId: true,
             },
           },
         },
       });
 
-      return order;
+      return {
+        ...order,
+        OrderItem: order.OrderItem.map((ordemItem) => ({
+          ...ordemItem,
+
+          name:
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            products.find((product) => product.id === ordemItem.productId).name,
+        })),
+      };
     } catch (e) {
       console.log(e);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument

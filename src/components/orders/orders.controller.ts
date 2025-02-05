@@ -1,5 +1,5 @@
 import { Controller, ParseUUIDPipe } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
 
 //Propio
 import { OrdersService } from './orders.service';
@@ -12,7 +12,15 @@ export class OrdersController {
 
   @MessagePattern('createOrder')
   private async create(@Payload() createOrderDto: CreateOrderDto) {
-    return await this.ordersService.create(createOrderDto);
+    const order = await this.ordersService.create(createOrderDto);
+
+    const paymentSession = await this.ordersService.createPaymentSession(order);
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return {
+      ...order,
+      ...paymentSession,
+    };
   }
 
   @MessagePattern('findAllOrders')
@@ -30,5 +38,11 @@ export class OrdersController {
     @Payload() changeOrderStatusDto: ChangeOrderStatusDto,
   ) {
     return await this.ordersService.changeStatus(changeOrderStatusDto);
+  }
+
+  //Aqui recibo el evento
+  @EventPattern('payment.succeeded')
+  paidOrder(@Payload() paidOrderDto: any) {
+    console.log(paidOrderDto);
   }
 }
