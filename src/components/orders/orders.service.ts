@@ -154,7 +154,22 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
         status: HttpStatus.BAD_REQUEST,
       });
     }
-    return order;
+    const productsIds = order.OrderItem.map((item) => item.productId);
+    //1. Confirmar los ids de los Productos
+    const products: any[] = await firstValueFrom(
+      this.client.send('validateProducts', { ids: productsIds }),
+    );
+
+    return {
+      ...order,
+      OrderItem: order.OrderItem.map((ordemItem) => ({
+        ...ordemItem,
+
+        name:
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          products.find((product) => product.id === ordemItem.productId).name,
+      })),
+    };
   }
 
   public async changeStatus(changeOrderStatusDto: ChangeOrderStatusDto) {
